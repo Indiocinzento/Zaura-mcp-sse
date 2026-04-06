@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Zaura MCP SSE</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: #fff; padding: 2rem; max-width: 800px; margin: auto; }
+        input, textarea { width: 100%; background: #1e1e1e; color: #fff; border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 5px; box-sizing: border-box;}
+        button { background: #ff007f; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        .card { background: #1e1e1e; padding: 15px; border-radius: 8px; margin-top: 20px; }
+        .url { color: #00ffcc; word-break: break-all; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>🐾 Zaura MCP Config</h1>
+    
+    <label>Nome do Servidor:</label>
+    <input type="text" id="name" value="fetch-zaura" required>
+
+    <label>Configuração JSON:</label>
+    <textarea id="config" rows="10">{
+  "mcpServers": {
+    "fetch": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"]
+    }
+  }
+}</textarea>
+
+    <button onclick="salvar()">Criar Endpoint SSE</button>
+
+    <h2>Endpoints Ativos</h2>
+    <div id="lista"></div>
+
+    <script>
+        async function loadConfigs() {
+            const res = await fetch('/api/configs');
+            const configs = await res.json();
+            const div = document.getElementById('lista');
+            div.innerHTML = configs.map(c => `
+                <div class="card">
+                    <strong>${c.name}</strong><br>
+                    URL SSE: <span class="url">https://zaura-mcp.hf.space/sse/${c.id}</span>
+                </div>
+            `).join('');
+        }
+
+        async function salvar() {
+            const name = document.getElementById('name').value;
+            const config = JSON.parse(document.getElementById('config').value);
+            
+            await fetch('/api/configs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, config })
+            });
+            
+            alert('Criado com sucesso!');
+            loadConfigs();
+        }
+
+        loadConfigs();
+    </script>
+</body>
+</html>
